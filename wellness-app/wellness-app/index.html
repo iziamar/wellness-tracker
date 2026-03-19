@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Wellness" />
+  <meta name="theme-color" content="#0F6E56" />
+  <title>My Wellness Tracker</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div id="auth-screen" class="screen active">
+    <div class="auth-wrap">
+      <div class="auth-logo">
+        <div class="logo-mark"></div>
+        <h1>Wellness Tracker</h1>
+        <p>Your PCOS + ADHD wellness system</p>
+      </div>
+      <div class="auth-card">
+        <div class="tab-row" id="auth-tabs">
+          <button class="tab active" onclick="authTab('login')">Sign in</button>
+          <button class="tab" onclick="authTab('signup')">Create account</button>
+        </div>
+        <div id="auth-error" class="error-msg" style="display:none"></div>
+        <div id="auth-login">
+          <input type="email" id="login-email" placeholder="Email address" autocomplete="email" />
+          <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password" />
+          <button class="btn-primary" onclick="signIn()">Sign in</button>
+          <button class="btn-ghost" onclick="signInAnon()">Continue without account</button>
+        </div>
+        <div id="auth-signup" style="display:none">
+          <input type="email" id="signup-email" placeholder="Email address" autocomplete="email" />
+          <input type="password" id="signup-pass" placeholder="Password (min 6 chars)" autocomplete="new-password" />
+          <input type="password" id="signup-confirm" placeholder="Confirm password" autocomplete="new-password" />
+          <button class="btn-primary" onclick="signUp()">Create account</button>
+        </div>
+      </div>
+      <p class="auth-note">Sign in to sync across all your devices. Or continue without an account to store data locally only.</p>
+    </div>
+  </div>
+
+  <div id="app-screen" class="screen">
+
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="header-left">
+          <div class="logo-mark small"></div>
+          <span class="header-title">Wellness</span>
+        </div>
+        <div class="header-right">
+          <div class="level-chip" id="header-level">Lv 1</div>
+          <button class="icon-btn" onclick="toggleMenu()" id="menu-btn" aria-label="Menu">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <circle cx="9" cy="4" r="1.5" fill="currentColor"/>
+              <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
+              <circle cx="9" cy="14" r="1.5" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div id="dropdown-menu" class="dropdown" style="display:none">
+        <button onclick="showTab('rewards');toggleMenu()">Reward shop</button>
+        <button onclick="showTab('history');toggleMenu()">History</button>
+        <button onclick="showTab('streaks');toggleMenu()">Streaks</button>
+        <button onclick="showTab('progress');toggleMenu()">Progress</button>
+        <hr/>
+        <button onclick="signOut()" class="danger">Sign out</button>
+      </div>
+    </header>
+
+    <div class="points-bar">
+      <div class="points-main">
+        <span id="pts-total">0</span>
+        <span class="pts-label">pts available</span>
+      </div>
+      <div class="points-secondary">
+        <div class="pts-stat">
+          <span id="pts-today">0</span>
+          <span>today</span>
+        </div>
+        <div class="pts-stat">
+          <span id="pts-alltime">0</span>
+          <span>all time</span>
+        </div>
+        <div class="pts-stat">
+          <span id="pts-streak-days">0</span>
+          <span>day streak</span>
+        </div>
+      </div>
+      <div class="xp-section">
+        <div class="xp-labels">
+          <span id="xp-level-name">Just getting started</span>
+          <span id="xp-pct">0% to next level</span>
+        </div>
+        <div class="xp-track"><div class="xp-fill" id="xp-fill"></div></div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" id="nav-log" onclick="showTab('log')">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/><rect x="11" y="3" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.4"/><rect x="3" y="11" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.4"/><rect x="11" y="11" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.7"/></svg>
+        <span>Log</span>
+      </button>
+      <button class="nav-btn" id="nav-rewards" onclick="showTab('rewards')">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l2.09 4.26L17 7.27l-3.5 3.41.83 4.82L10 13.27l-4.33 2.23.83-4.82L3 7.27l4.91-.71L10 2z" fill="currentColor" opacity="0.8"/></svg>
+        <span>Rewards</span>
+      </button>
+      <button class="nav-btn" id="nav-history" onclick="showTab('history')">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 6v4l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>History</span>
+      </button>
+      <button class="nav-btn" id="nav-streaks" onclick="showTab('streaks')">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M11 2c0 4-4 5-4 9a4 4 0 008 0c0-5-4-5-4-9z" fill="currentColor" opacity="0.8"/><path d="M10 14a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" fill="white"/></svg>
+        <span>Streaks</span>
+      </button>
+      <button class="nav-btn" id="nav-progress" onclick="showTab('progress')">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 14l4-4 3 3 4-5 3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <span>Progress</span>
+      </button>
+    </nav>
+
+    <main class="main-content">
+
+      <div id="tab-log" class="tab-pane active">
+        <div class="cat-filter" id="cat-filter"></div>
+        <div id="habits-list"></div>
+      </div>
+
+      <div id="tab-rewards" class="tab-pane">
+        <div class="section-header">
+          <h2>Reward shop</h2>
+          <span class="pts-chip" id="reward-pts-chip">0 pts</span>
+        </div>
+        <p class="section-sub">You earned these. Spend them without guilt.</p>
+        <div id="rewards-grid"></div>
+      </div>
+
+      <div id="tab-history" class="tab-pane">
+        <div class="section-header"><h2>Activity log</h2></div>
+        <div id="history-list"></div>
+      </div>
+
+      <div id="tab-streaks" class="tab-pane">
+        <div class="section-header"><h2>Habit streaks</h2></div>
+        <p class="section-sub">3-day streak = +20% pts &nbsp;·&nbsp; 7-day streak = +50% pts</p>
+        <div id="streaks-list"></div>
+      </div>
+
+      <div id="tab-progress" class="tab-pane">
+        <div class="section-header"><h2>Progress</h2></div>
+        <div id="progress-content"></div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
